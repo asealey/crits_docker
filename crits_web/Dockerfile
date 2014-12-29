@@ -37,8 +37,11 @@ RUN adduser crits && \
   touch logs/crits.log && \
   chmod 664 logs/crits.log
 
+# Setup the mongo config
+COPY config/database.py /data/crits/crits/config/
 
-
+# Create default collections in mongo
+RUN cd /data/crits && python manage.py create_default_collections
 
 ########## Setup Apache ###########
 RUN apt-get install -y apache2 && \
@@ -70,3 +73,5 @@ RUN cd /tmp && \
 
 # Start up apache
 RUN /etc/init.d/apache2 restart
+
+VOLUME ["/data/crits"]
