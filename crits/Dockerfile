@@ -21,8 +21,11 @@ RUN cd /tmp && \
   ./install_dependencies.sh
 
 # Tweak TCP Server params
-RUN echo 1 > /proc/sys/net/ipv4/tcp_tw_reuse
-RUN echo 1 > /proc/sys/net/ipv4/tcp_tw_recycle
+# Not working because of Read-only filesystem
+# Known issue: https://github.com/docker/docker/issues/4717, https://github.com/docker/docker/issues/5703
+# Parameters should be set at the host level
+#RUN echo 1 > /proc/sys/net/ipv4/tcp_tw_reuse
+#RUN echo 1 > /proc/sys/net/ipv4/tcp_tw_recycle
 
 ########### Setting up codebase ###########
 RUN adduser crits && \
@@ -67,7 +70,3 @@ RUN cd /tmp && \
 
 # Start up apache
 RUN /etc/init.d/apache2 restart
-
-
-# Installing the codebase
-RUN adduser crits
