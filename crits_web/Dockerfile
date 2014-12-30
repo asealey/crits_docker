@@ -16,8 +16,12 @@ RUN apt-get update && apt-get install -y \
 
 ########## Install CRITs dependencies ##############
 RUN cd /tmp && \
-  git clone https://github.com/crits/crits_dependencies.git && \
-  cd crits_dependencies && \
+  # The asealey fork has an updated version of ssdeep which is required for successful build
+  #git clone https://github.com/asealey/crits_dependencies.git && \
+
+  # Using direct zip instead of git clone
+  curl -SL https://github.com/asealey/crits_dependencies/archive/master.tar.gz | tar -xzC /tmp
+RUN cd /tmp/crits_dependencies-master && \
   ./install_dependencies.sh
 
 # Tweak TCP Server params
