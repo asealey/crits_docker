@@ -4,6 +4,7 @@ FROM ubuntu:precise
 MAINTAINER Adam Sealey <asealey@gmail.com>
 
 ENV DEBIAN_FRONTEND noninteractive
+ENV LC_ALL C
 
 # Install Updates
 RUN apt-get update && apt-get install -y \
