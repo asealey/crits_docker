@@ -38,5 +38,10 @@ fi
 echo "Creating user=$user, email='$email'"
 
 # Create collection in mongo
-#cd /data/crits
-#python manage.py create_default_collections
+cd /data/crits
+python manage.py create_default_collections
+
+# Create user
+python manage.py users -a -A -u $user -e $email
+
+echo done
