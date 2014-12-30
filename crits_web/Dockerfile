@@ -53,7 +53,8 @@ RUN adduser crits && \
 COPY config/database.py /data/crits/crits/config/
 
 # Create default collections in mongo
-RUN cd /data/crits && python manage.py create_default_collections
+# Can't run this command, because not connected to the Mongo container yet
+#RUN cd /data/crits && python manage.py create_default_collections
 
 ########## Setup Apache ###########
 RUN apt-get install -y apache2 && \
@@ -87,3 +88,6 @@ RUN cd /tmp && \
 RUN /etc/init.d/apache2 restart
 
 VOLUME ["/data/crits"]
+
+EXPOSE 80
+EXPOSE 443
