@@ -14,16 +14,13 @@ RUN apt-get update && apt-get install -y \
   wget \
   vim
 
-
 ########## Install CRITs dependencies ##############
-RUN cd /tmp && \
-  # The asealey fork has an updated version of ssdeep which is required for successful build
-  #git clone https://github.com/asealey/crits_dependencies.git && \
-
-  # Using direct zip instead of git clone
-  curl -SL https://github.com/asealey/crits_dependencies/archive/master.tar.gz | tar -xzC /tmp
-RUN cd /tmp/crits_dependencies-master && \
-  ./install_dependencies.sh
+# The asealey fork has an updated version of ssdeep which is required for successful build
+#git clone https://github.com/asealey/crits_dependencies.git && \
+# Using direct zip instead of git clone
+RUN curl -SL https://github.com/asealey/crits_dependencies/archive/master.tar.gz | tar -xzC /tmp
+WORKDIR /tmp/crits_dependencies-master
+RUN ./install_dependencies.sh
 
 # Extra dependencies which seem to be missed
 COPY install_extra_deps.sh /tmp/
@@ -31,7 +28,6 @@ RUN /bin/bash /tmp/install_extra_deps.sh
 
 # Clean up
 RUN rm -fr /tmp/*
-
 
 # Tweak TCP Server params
 # Not working because of Read-only filesystem
@@ -41,12 +37,11 @@ RUN rm -fr /tmp/*
 #RUN echo 1 > /proc/sys/net/ipv4/tcp_tw_recycle
 
 ########### Setting up codebase ###########
-RUN adduser crits && \
-  mkdir -p /data/crits && \
-  cd /data && \
-  git clone https://github.com/asealey/crits.git && \
-  cd /data/crits && \
-  chgrp -R crits logs && \
+RUN useradd -r -s /bin/false crits
+WORKDIR /data
+RUN git clone https://github.com/asealey/crits.git
+WORKDIR /data/crits
+RUN chgrp -R crits logs && \
   touch logs/crits.log && \
   chmod 664 logs/crits.log
 
@@ -75,10 +70,8 @@ RUN rm /etc/apache2/sites-enabled/* && \
   ln -s /etc/apache2/sites-available/default-ssl /etc/apache2/sites-enabled/default-ssl
 
 # Generate temp cert
-RUN cd /tmp && \
-  #openssl req -new > new.cert.csr && \
-  #openssl rsa -in privkey.pem -out new.cert.key && \
-  openssl req -nodes -newkey rsa:2048 -keyout new.cert.key -out new.cert.csr -subj "/C=US/ST=Oregon/L=Beaverton/O=Security/OU=Security/CN=crits.example.com" && \
+WORKDIR /tmp
+RUN openssl req -nodes -newkey rsa:2048 -keyout new.cert.key -out new.cert.csr -subj "/C=US/ST=Oregon/L=Beaverton/O=Security/OU=Security/CN=crits.example.com" && \
   openssl x509 -in new.cert.csr -out new.cert.cert -req -signkey new.cert.key -days 1825 && \
   cp new.cert.cert /etc/ssl/certs/crits.crt && \
   cp new.cert.key /etc/ssl/private/crits.plain.key && \
@@ -92,3 +85,5 @@ VOLUME ["/data/crits"]
 
 EXPOSE 80
 EXPOSE 443
+
+WORKDIR /data/crits
