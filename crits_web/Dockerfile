@@ -24,6 +24,14 @@ RUN cd /tmp && \
 RUN cd /tmp/crits_dependencies-master && \
   ./install_dependencies.sh
 
+# Extra dependencies which seem to be missed
+COPY install_extra_deps.sh /tmp/
+RUN /bin/bash /tmp/install_extra_deps.sh
+
+# Clean up
+RUN rm -fr /tmp/*
+
+
 # Tweak TCP Server params
 # Not working because of Read-only filesystem
 # Known issue: https://github.com/docker/docker/issues/4717, https://github.com/docker/docker/issues/5703
