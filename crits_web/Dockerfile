@@ -41,8 +41,8 @@ RUN useradd -r -s /bin/false crits
 WORKDIR /data
 RUN git clone https://github.com/asealey/crits.git
 WORKDIR /data/crits
-RUN chgrp -R crits logs && \
-  touch logs/crits.log && \
+RUN touch logs/crits.log && \
+  chgrp -R crits logs && \  
   chmod 664 logs/crits.log
 
 # Setup the mongo config
@@ -58,7 +58,9 @@ COPY initializeMongo.sh /data/crits/
 ########## Setup Apache ###########
 RUN apt-get install -y apache2 && \
   /etc/init.d/apache2 stop && \
-  rm -rf /etc/apache2/sites-available/*
+  rm -rf /etc/apache2/sites-available/* && \
+  mkdir /var/run/apache2 && \
+  usermod -a -G crits www-data
 
 # Copy up apache configs
 # TODO: Currently pulls straight from github, because relative path wasn't working
@@ -81,12 +83,12 @@ RUN openssl req -nodes -newkey rsa:2048 -keyout new.cert.key -out new.cert.csr -
   a2enmod ssl && \
   echo "export LANG=en_US.UTF-8" >> /etc/apache2/envvars
 
-# Start up apache
-RUN /etc/init.d/apache2 restart
 
 VOLUME ["/data/crits"]
 
-EXPOSE 80
 EXPOSE 443
 
 WORKDIR /data/crits
+
+# Start up apache
+ENTRYPOINT ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
