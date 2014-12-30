@@ -48,6 +48,9 @@ RUN chgrp -R crits logs && \
 # Setup the mongo config
 COPY config/database.py /data/crits/crits/config/
 
+# Copy script for initializing mongo
+COPY initializeMongo.sh /data/crits/
+
 # Create default collections in mongo
 # Can't run this command, because not connected to the Mongo container yet
 #RUN cd /data/crits && python manage.py create_default_collections
