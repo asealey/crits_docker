@@ -78,13 +78,19 @@ RUN rm /etc/apache2/sites-enabled/* && \
 WORKDIR /tmp
 RUN openssl req -nodes -newkey rsa:2048 -keyout new.cert.key -out new.cert.csr -subj "/C=US/ST=Oregon/L=Beaverton/O=Security/OU=Security/CN=crits.example.com" && \
   openssl x509 -in new.cert.csr -out new.cert.cert -req -signkey new.cert.key -days 1825 && \
-  cp new.cert.cert /etc/ssl/certs/crits.crt && \
-  cp new.cert.key /etc/ssl/private/crits.plain.key && \
+  # Place the certs inside the crits directory, so they can be overridden with a volume
+  mkdir -p /data/crits/ssl/ && \
+  cp new.cert.cert /data/crits/ssl/crits.crt && \
+  cp new.cert.key /data/crits/ssl/crits.plain.key && \
+  # Create sym-links to keys, to preserve http config
+  ln -s /data/crits/ssl/crits.crt /etc/ssl/certs/crits.crt && \
+  ln -s /data/crits/ssl/crits.plain.key /etc/ssl/private/crits.plain.key && \
   a2enmod ssl && \
   echo "export LANG=en_US.UTF-8" >> /etc/apache2/envvars
 
 
 VOLUME ["/data/crits"]
+VOLUME ["/data/crits/ssl"]
 
 EXPOSE 443
 
