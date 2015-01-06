@@ -1,0 +1,23 @@
+#############
+# fig.yml
+# Author: Adam Sealey <asealey@gmail.com>
+# Usage:
+#  fig -p crits build
+#  fig -p crits start
+#  fig -p crits ps
+#############
+
+# Crits Frontend Webserver
+web:
+  build: ./crits_web
+  ports:
+    - "1443:443"
+  links:
+    - mongo:crits_mongo
+  hostname: crits.example.com
+
+# Mongo DB server for Crits
+mongo:
+  build: ./crits_mongo
+  volumes:
+    - /data/db:/data/db
